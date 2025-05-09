@@ -91,11 +91,16 @@ export async function saveProjectToDirectory(args: {
 						try {
 							const existing = await args.fs.readFile(p, "utf-8");
 							const stringify = detectJsonFormatting(existing);
+							const unordered = JSON.parse(
+								new TextDecoder().decode(file.content)
+							);
+							const ordered: { [key: string]: string } = {};
+							Object.keys(unordered)
+								.sort()
+								.forEach((key) => (ordered[key] = unordered[key]));
 							await args.fs.writeFile(
 								p,
-								new TextEncoder().encode(
-									stringify(JSON.parse(new TextDecoder().decode(file.content)))
-								)
+								new TextEncoder().encode(stringify(ordered))
 							);
 						} catch {
 							// write the file to disk (json doesn't exist yet)
